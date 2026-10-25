@@ -14,7 +14,7 @@ export function Tree(array) {
     return root;
   };
 
-  const root = buildTree(cleanedArr);
+  let root = buildTree(cleanedArr);
 
   const includes = (value) => {
     let tempRoot = root;
@@ -32,8 +32,39 @@ export function Tree(array) {
     return false;
   };
 
+  const insert = (value) => {
+    if (root === null) {
+      root = Node(value);
+      return;
+    }
+
+    let tempRoot = root;
+    let direction;
+
+    while (true) {
+      if (value === tempRoot.data) {
+        return;
+      } else if (value > tempRoot.data) {
+        direction = "right";
+      } else {
+        direction = "left";
+      }
+
+      if (tempRoot[direction]) {
+        tempRoot = tempRoot[direction];
+      } else {
+        break;
+      }
+    }
+
+    tempRoot[direction] = Node(value);
+  };
+
   return {
-    root,
+    get root() {
+      return root;
+    },
     includes,
+    insert,
   };
 }
