@@ -2,6 +2,8 @@ import { Node } from "./Node.js";
 import { mergeSort, unique } from "./helpers.js";
 
 export function Tree(array) {
+  const cleanedArr = mergeSort(unique(array));
+
   const buildTree = (array) => {
     if (array.length === 0) return null;
     const mid = Math.floor((0 + array.length - 1) / 2);
@@ -11,20 +13,30 @@ export function Tree(array) {
 
     return root;
   };
-  const root = buildTree(mergeSort(unique(array)));
+
+  const root = buildTree(cleanedArr);
 
   // Binary tree traversal will result : O(n)
   // Binary search with the original array will result : O(log n)
   // Using the original array will be more efficient
   const includes = (value) => {
-    const innerIncludes = (r, val) => {
-      if (r === null) return false;
-      if (r.data === val) return true;
+    let low = 0;
+    let high = cleanedArr.length - 1;
+    let mid;
 
-      return innerIncludes(r.left, val) || innerIncludes(r.right, val);
-    };
+    while (low <= high) {
+      mid = Math.floor((high + low) / 2);
 
-    return innerIncludes(root, value);
+      if (cleanedArr[mid] === value) {
+        return true;
+      } else if (cleanedArr[mid] < value) {
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+    }
+
+    return false;
   };
 
   return {
