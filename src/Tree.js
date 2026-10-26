@@ -214,6 +214,12 @@ export function Tree(array) {
     return isBalancedNode(root) > 0;
   }
 
+  function rebalance() {
+    const newArray = [];
+    inOrderForEach((val) => newArray.push(val));
+    root = buildTree(newArray);
+  }
+
   return {
     get root() {
       return root;
@@ -229,5 +235,6 @@ export function Tree(array) {
     depth,
     height,
     isBalanced,
+    rebalance,
   };
 }
