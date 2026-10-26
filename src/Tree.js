@@ -69,7 +69,7 @@ export function Tree(array) {
     }
 
     function innerDelete(r = root, val = value) {
-      if (!r) return;
+      if (!r) return null;
       if (val > r.data) r.right = innerDelete(r.right, val);
       if (val < r.data) r.left = innerDelete(r.left, val);
       if (val === r.data) {
@@ -118,6 +118,45 @@ export function Tree(array) {
     }
   }
 
+  function preOrderForEach(callback) {
+    if (!callback) throw new Error("A callback is required");
+
+    function innerPreOrder(r = root) {
+      if (!r) return;
+      callback(r.data);
+      innerPreOrder(r.left);
+      innerPreOrder(r.right);
+    }
+
+    return innerPreOrder();
+  }
+
+  function inOrderForEach(callback) {
+    if (!callback) throw new Error("A callback is required");
+
+    function innerInOrder(r = root) {
+      if (!r) return;
+      innerInOrder(r.left);
+      callback(r.data);
+      innerInOrder(r.right);
+    }
+
+    return innerInOrder();
+  }
+
+  function postOrderForEach(callback) {
+    if (!callback) throw new Error("A callback is required");
+
+    function innerPostOrder(r = root) {
+      if (!r) return;
+      innerPostOrder(r.left);
+      innerPostOrder(r.right);
+      callback(r.data);
+    }
+
+    return innerPostOrder();
+  }
+
   return {
     get root() {
       return root;
@@ -127,5 +166,8 @@ export function Tree(array) {
     deleteItem,
     levelOrderForEachRec,
     levelOrderForEach,
+    preOrderForEach,
+    inOrderForEach,
+    postOrderForEach,
   };
 }
