@@ -6,6 +6,7 @@ export function Tree(array) {
 
   const buildTree = (array) => {
     if (array.length === 0) return null;
+
     const mid = Math.floor((0 + array.length - 1) / 2);
     const root = Node(array[mid]);
     root.left = buildTree(array.slice(0, mid));
@@ -86,6 +87,37 @@ export function Tree(array) {
     return innerDelete();
   };
 
+  function levelOrderForEachRec(callback) {
+    if (!callback) throw new Error("A callback is required");
+
+    function levelOrderRec(arr = [root]) {
+      if (!arr.length) return;
+
+      const currentNode = arr.shift();
+      callback(currentNode.data);
+
+      if (currentNode.left) arr.push(currentNode.left);
+      if (currentNode.right) arr.push(currentNode.right);
+
+      levelOrderRec(arr);
+    }
+
+    return levelOrderRec();
+  }
+
+  function levelOrderForEach(callback) {
+    if (!callback) throw new Error("A callback is required");
+    const arr = [root];
+
+    while (arr.length > 0) {
+      const currentNode = arr.shift();
+      callback(currentNode.data);
+
+      if (currentNode.left) arr.push(currentNode.left);
+      if (currentNode.right) arr.push(currentNode.right);
+    }
+  }
+
   return {
     get root() {
       return root;
@@ -93,5 +125,7 @@ export function Tree(array) {
     includes,
     insert,
     deleteItem,
+    levelOrderForEachRec,
+    levelOrderForEach,
   };
 }
