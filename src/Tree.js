@@ -157,16 +157,16 @@ export function Tree(array) {
     return innerPostOrder();
   }
 
+  function nodeHeight(node) {
+    if (!node) return -1;
+
+    const leftSubtree = nodeHeight(node.left);
+    const rightSubtree = nodeHeight(node.right);
+
+    return Math.max(leftSubtree, rightSubtree) + 1;
+  }
+
   function height(value) {
-    function innerHeight(r = tempRoot) {
-      if (!r) return -1;
-
-      const leftSubtree = innerHeight(r.left);
-      const rightSubtree = innerHeight(r.right);
-
-      return Math.max(leftSubtree, rightSubtree) + 1;
-    }
-
     let tempRoot = root;
     while (tempRoot) {
       if (value === tempRoot.data) {
@@ -178,7 +178,7 @@ export function Tree(array) {
       }
     }
 
-    const height = innerHeight(tempRoot);
+    const height = nodeHeight(tempRoot);
     return height >= 0 ? height : undefined;
   }
 
@@ -197,6 +197,23 @@ export function Tree(array) {
     return innerDepth();
   }
 
+  function isBalancedNode(node) {
+    if (!node) return true;
+
+    const leftHeight = nodeHeight(node.left);
+    const rightHeight = nodeHeight(node.right);
+
+    if (Math.abs(leftHeight - rightHeight) > 1) {
+      return false;
+    } else {
+      return isBalancedNode(node.left) && isBalancedNode(node.right);
+    }
+  }
+
+  function isBalanced() {
+    return isBalancedNode(root) > 0;
+  }
+
   return {
     get root() {
       return root;
@@ -211,5 +228,6 @@ export function Tree(array) {
     postOrderForEach,
     depth,
     height,
+    isBalanced,
   };
 }
