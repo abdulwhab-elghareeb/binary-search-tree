@@ -60,11 +60,38 @@ export function Tree(array) {
     tempRoot[direction] = Node(value);
   };
 
+  const deleteItem = (value) => {
+    function getPredecessor(root) {
+      let curr = root.left;
+      while (curr?.right) curr = curr.right;
+      return curr;
+    }
+
+    function innerDelete(r = root, val = value) {
+      if (!r) return;
+      if (val > r.data) r.right = innerDelete(r.right, val);
+      if (val < r.data) r.left = innerDelete(r.left, val);
+      if (val === r.data) {
+        if (!r.left) return r.right;
+        if (!r.right) return r.left;
+
+        const predecessor = getPredecessor(r);
+        r.data = predecessor.data;
+        r.left = innerDelete(r.left, predecessor.data);
+      }
+
+      return r;
+    }
+
+    return innerDelete();
+  };
+
   return {
     get root() {
       return root;
     },
     includes,
     insert,
+    deleteItem,
   };
 }
