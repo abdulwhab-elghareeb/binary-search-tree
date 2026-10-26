@@ -157,6 +157,46 @@ export function Tree(array) {
     return innerPostOrder();
   }
 
+  function height(value) {
+    function innerHeight(r = tempRoot) {
+      if (!r) return -1;
+
+      const leftSubtree = innerHeight(r.left);
+      const rightSubtree = innerHeight(r.right);
+
+      return Math.max(leftSubtree, rightSubtree) + 1;
+    }
+
+    let tempRoot = root;
+    while (tempRoot) {
+      if (value === tempRoot.data) {
+        break;
+      } else if (value > tempRoot.data) {
+        tempRoot = tempRoot.right;
+      } else {
+        tempRoot = tempRoot.left;
+      }
+    }
+
+    const height = innerHeight(tempRoot);
+    return height >= 0 ? height : undefined;
+  }
+
+  function depth(value) {
+    function innerDepth(r = root) {
+      if (!r) return;
+
+      let height = 0;
+      if (value === r.data) return 0;
+      if (value > r.data) height = innerDepth(r.right);
+      if (value < r.data) height = innerDepth(r.left);
+
+      return height + 1 || undefined;
+    }
+
+    return innerDepth();
+  }
+
   return {
     get root() {
       return root;
@@ -169,5 +209,7 @@ export function Tree(array) {
     preOrderForEach,
     inOrderForEach,
     postOrderForEach,
+    depth,
+    height,
   };
 }
