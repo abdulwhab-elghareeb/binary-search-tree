@@ -4,20 +4,20 @@ import { mergeSort, unique } from "./helpers.js";
 export function Tree(array) {
   const cleanedArr = mergeSort(unique(array));
 
-  const buildTree = (array) => {
+  function buildTree(array) {
     if (array.length === 0) return null;
 
-    const mid = Math.floor((0 + array.length - 1) / 2);
+    const mid = Math.floor((array.length - 1) / 2);
     const root = Node(array[mid]);
     root.left = buildTree(array.slice(0, mid));
     root.right = buildTree(array.slice(mid + 1));
 
     return root;
-  };
+  }
 
   let root = buildTree(cleanedArr);
 
-  const includes = (value) => {
+  function includes(value) {
     let tempRoot = root;
 
     while (tempRoot) {
@@ -31,10 +31,10 @@ export function Tree(array) {
     }
 
     return false;
-  };
+  }
 
-  const insert = (value) => {
-    if (root === null) {
+  function insert(value) {
+    if (!root) {
       root = Node(value);
       return;
     }
@@ -59,50 +59,49 @@ export function Tree(array) {
     }
 
     tempRoot[direction] = Node(value);
-  };
+  }
 
-  const deleteItem = (value) => {
-    function getPredecessor(root) {
-      let curr = root.left;
-      while (curr?.right) curr = curr.right;
-      return curr;
+  function getPredecessor(root) {
+    let curr = root.left;
+    while (curr?.right) curr = curr.right;
+    return curr;
+  }
+
+  function deleteNode(root, value) {
+    if (!root) return null;
+    if (value > root.data) root.right = deleteNode(root.right, value);
+    if (value < root.data) root.left = deleteNode(root.left, value);
+    if (value === root.data) {
+      if (!root.left) return root.right;
+      if (!root.right) return root.left;
+
+      const predecessor = getPredecessor(root);
+      root.data = predecessor.data;
+      root.left = deleteNode(root.left, predecessor.data);
     }
 
-    function innerDelete(r = root, val = value) {
-      if (!r) return null;
-      if (val > r.data) r.right = innerDelete(r.right, val);
-      if (val < r.data) r.left = innerDelete(r.left, val);
-      if (val === r.data) {
-        if (!r.left) return r.right;
-        if (!r.right) return r.left;
+    return root;
+  }
 
-        const predecessor = getPredecessor(r);
-        r.data = predecessor.data;
-        r.left = innerDelete(r.left, predecessor.data);
-      }
+  function deleteItem(value) {
+    return deleteNode(root, value);
+  }
 
-      return r;
-    }
+  function levelOrderRec(callback, arr = [root]) {
+    if (arr.length === 0) return;
 
-    return innerDelete();
-  };
+    const currentNode = arr.shift();
+    callback(currentNode.data);
+
+    if (currentNode.left) arr.push(currentNode.left);
+    if (currentNode.right) arr.push(currentNode.right);
+
+    levelOrderRec(arr);
+  }
 
   function levelOrderForEachRec(callback) {
     if (!callback) throw new Error("A callback is required");
-
-    function levelOrderRec(arr = [root]) {
-      if (!arr.length) return;
-
-      const currentNode = arr.shift();
-      callback(currentNode.data);
-
-      if (currentNode.left) arr.push(currentNode.left);
-      if (currentNode.right) arr.push(currentNode.right);
-
-      levelOrderRec(arr);
-    }
-
-    return levelOrderRec();
+    return levelOrderRec(callback);
   }
 
   function levelOrderForEach(callback) {
@@ -118,43 +117,40 @@ export function Tree(array) {
     }
   }
 
+  function preOrderNode(root, callback) {
+    if (!root) return;
+    callback(root.data);
+    preOrderNode(root.left, callback);
+    preOrderNode(root.right, callback);
+  }
+
+  function inOrderNode(root, callback) {
+    if (!root) return;
+    inOrderNode(root.left, callback);
+    callback(root.data);
+    inOrderNode(root.right, callback);
+  }
+
+  function postOrderNode(root, callback) {
+    if (!root) return;
+    postOrderNode(root.left, callback);
+    postOrderNode(root.right, callback);
+    callback(root.data);
+  }
+
   function preOrderForEach(callback) {
     if (!callback) throw new Error("A callback is required");
-
-    function innerPreOrder(r = root) {
-      if (!r) return;
-      callback(r.data);
-      innerPreOrder(r.left);
-      innerPreOrder(r.right);
-    }
-
-    return innerPreOrder();
+    return preOrderNode(root, callback);
   }
 
   function inOrderForEach(callback) {
     if (!callback) throw new Error("A callback is required");
-
-    function innerInOrder(r = root) {
-      if (!r) return;
-      innerInOrder(r.left);
-      callback(r.data);
-      innerInOrder(r.right);
-    }
-
-    return innerInOrder();
+    return inOrderNode(root, callback);
   }
 
   function postOrderForEach(callback) {
     if (!callback) throw new Error("A callback is required");
-
-    function innerPostOrder(r = root) {
-      if (!r) return;
-      innerPostOrder(r.left);
-      innerPostOrder(r.right);
-      callback(r.data);
-    }
-
-    return innerPostOrder();
+    return postOrderNode(root, callback);
   }
 
   function nodeHeight(node) {
@@ -164,6 +160,14 @@ export function Tree(array) {
     const rightSubtree = nodeHeight(node.right);
 
     return Math.max(leftSubtree, rightSubtree) + 1;
+  }
+
+  function nodeDepth(root, value) {
+    if (!root) return;
+
+    if (value === root.data) return 0;
+    if (value > root.data) return nodeDepth(root.right) + 1 || undefined;
+    if (value < root.data) return nodeDepth(root.left) + 1 || undefined;
   }
 
   function height(value) {
@@ -183,27 +187,13 @@ export function Tree(array) {
   }
 
   function depth(value) {
-    function innerDepth(r = root) {
-      if (!r) return;
-
-      let height = 0;
-      if (value === r.data) return 0;
-      if (value > r.data) height = innerDepth(r.right);
-      if (value < r.data) height = innerDepth(r.left);
-
-      return height + 1 || undefined;
-    }
-
-    return innerDepth();
+    return nodeDepth(root, value);
   }
 
   function isBalancedNode(node) {
     if (!node) return true;
 
-    const leftHeight = nodeHeight(node.left);
-    const rightHeight = nodeHeight(node.right);
-
-    if (Math.abs(leftHeight - rightHeight) > 1) {
+    if (Math.abs(nodeHeight(node.left) - nodeHeight(node.right)) > 1) {
       return false;
     } else {
       return isBalancedNode(node.left) && isBalancedNode(node.right);
