@@ -1,24 +1,30 @@
 import { Node } from "./Node.js";
 import { mergeSort, unique } from "./helpers.js";
 
-export function Tree(array = []) {
-  const cleanedArr = mergeSort(unique(array));
+export class Tree {
+  #root;
+  constructor(array) {
+    if (!Array.isArray(array)) array = [];
+    this.#root = this.#buildTree(mergeSort(unique(array)));
+  }
 
-  function buildTree(array) {
+  #buildTree(array) {
     if (array.length === 0) return null;
 
     const mid = Math.floor((array.length - 1) / 2);
-    const root = Node(array[mid]);
-    root.left = buildTree(array.slice(0, mid));
-    root.right = buildTree(array.slice(mid + 1));
+    const root = new Node(array[mid]);
+    root.left = this.#buildTree(array.slice(0, mid));
+    root.right = this.#buildTree(array.slice(mid + 1));
 
     return root;
   }
 
-  let root = buildTree(cleanedArr);
+  get root() {
+    return this.#root;
+  }
 
-  function includes(value) {
-    let tempRoot = root;
+  includes(value) {
+    let tempRoot = this.#root;
 
     while (tempRoot) {
       if (tempRoot.data === value) {
@@ -33,13 +39,13 @@ export function Tree(array = []) {
     return false;
   }
 
-  function insert(value) {
-    if (!root) {
-      root = Node(value);
+  insert(value) {
+    if (!this.#root) {
+      this.#root = new Node(value);
       return;
     }
 
-    let tempRoot = root;
+    let tempRoot = this.#root;
     let direction;
 
     while (true) {
@@ -58,36 +64,36 @@ export function Tree(array = []) {
       }
     }
 
-    tempRoot[direction] = Node(value);
+    tempRoot[direction] = new Node(value);
   }
 
-  function getPredecessor(root) {
+  #getPredecessor(root) {
     let curr = root.left;
     while (curr?.right) curr = curr.right;
     return curr;
   }
 
-  function deleteNode(root, value) {
+  #deleteNode(root, value) {
     if (!root) return null;
-    if (value > root.data) root.right = deleteNode(root.right, value);
-    if (value < root.data) root.left = deleteNode(root.left, value);
+    if (value > root.data) root.right = this.#deleteNode(root.right, value);
+    if (value < root.data) root.left = this.#deleteNode(root.left, value);
     if (value === root.data) {
       if (!root.left) return root.right;
       if (!root.right) return root.left;
 
-      const predecessor = getPredecessor(root);
+      const predecessor = this.#getPredecessor(root);
       root.data = predecessor.data;
-      root.left = deleteNode(root.left, predecessor.data);
+      root.left = this.#deleteNode(root.left, predecessor.data);
     }
 
     return root;
   }
 
-  function deleteItem(value) {
-    deleteNode(root, value);
+  deleteItem(value) {
+    this.#deleteNode(this.#root, value);
   }
 
-  function levelOrderRec(callback, queue = [root]) {
+  #levelOrderRec(callback, queue = [this.#root]) {
     if (queue.length === 0) return;
 
     const currentNode = queue.shift();
@@ -96,17 +102,17 @@ export function Tree(array = []) {
     if (currentNode.left) queue.push(currentNode.left);
     if (currentNode.right) queue.push(currentNode.right);
 
-    levelOrderRec(queue);
+    this.#levelOrderRec(queue);
   }
 
-  function levelOrderForEachRec(callback) {
+  levelOrderForEachRec(callback) {
     if (!callback) throw new Error("A callback is required");
-    return levelOrderRec(callback);
+    return this.#levelOrderRec(callback);
   }
 
-  function levelOrderForEach(callback) {
+  levelOrderForEach(callback) {
     if (!callback) throw new Error("A callback is required");
-    const queue = [root];
+    const queue = [this.#root];
 
     while (queue.length) {
       const currentNode = queue.shift();
@@ -117,57 +123,61 @@ export function Tree(array = []) {
     }
   }
 
-  function preOrderNode(root, callback) {
+  #preOrderNode(root, callback) {
     if (!root) return;
     callback(root.data);
-    preOrderNode(root.left, callback);
-    preOrderNode(root.right, callback);
+    this.#preOrderNode(root.left, callback);
+    this.#preOrderNode(root.right, callback);
   }
 
-  function inOrderNode(root, callback) {
+  #inOrderNode(root, callback) {
     if (!root) return;
-    inOrderNode(root.left, callback);
+    this.#inOrderNode(root.left, callback);
     callback(root.data);
-    inOrderNode(root.right, callback);
+    this.#inOrderNode(root.right, callback);
   }
 
-  function postOrderNode(root, callback) {
+  #postOrderNode(root, callback) {
     if (!root) return;
-    postOrderNode(root.left, callback);
-    postOrderNode(root.right, callback);
+    this.#postOrderNode(root.left, callback);
+    this.#postOrderNode(root.right, callback);
     callback(root.data);
   }
 
-  function preOrderForEach(callback) {
+  preOrderForEach(callback) {
     if (!callback) throw new Error("A callback is required");
-    return preOrderNode(root, callback);
+    return this.#preOrderNode(this.#root, callback);
   }
 
-  function inOrderForEach(callback) {
+  inOrderForEach(callback) {
     if (!callback) throw new Error("A callback is required");
-    return inOrderNode(root, callback);
+    return this.#inOrderNode(this.#root, callback);
   }
 
-  function postOrderForEach(callback) {
+  postOrderForEach(callback) {
     if (!callback) throw new Error("A callback is required");
-    return postOrderNode(root, callback);
+    return this.#postOrderNode(this.#root, callback);
   }
 
-  function nodeHeight(node) {
+  #nodeHeight(node) {
     if (!node) return -1;
-    return Math.max(nodeHeight(node.left), nodeHeight(node.right)) + 1;
+    return (
+      Math.max(this.#nodeHeight(node.left), this.#nodeHeight(node.right)) + 1
+    );
   }
 
-  function nodeDepth(root, value) {
+  #nodeDepth(root, val) {
     if (!root) return;
 
-    if (value === root.data) return 0;
-    if (value > root.data) return nodeDepth(root.right) + 1 || undefined;
-    if (value < root.data) return nodeDepth(root.left) + 1 || undefined;
+    if (val === root.data) return 0;
+    if (val > root.data)
+      return this.#nodeDepth(root.right, val) + 1 || undefined;
+    if (val < root.data)
+      return this.#nodeDepth(root.left, val) + 1 || undefined;
   }
 
-  function height(value) {
-    let tempRoot = root;
+  height(value) {
+    let tempRoot = this.#root;
     while (tempRoot) {
       if (value === tempRoot.data) {
         break;
@@ -179,20 +189,20 @@ export function Tree(array = []) {
     }
 
     if (!tempRoot) return;
-    return nodeHeight(tempRoot);
+    return this.#nodeHeight(tempRoot);
   }
 
-  function depth(value) {
-    return nodeDepth(root, value);
+  depth(value) {
+    return this.#nodeDepth(this.#root, value);
   }
 
-  function isBalancedNode(node) {
+  #isBalancedNode(node) {
     if (!node) return true;
 
     if (
-      !isBalancedNode(node.right) ||
-      !isBalancedNode(node.left) ||
-      Math.abs(nodeHeight(node.left) - nodeHeight(node.right)) > 1
+      !this.#isBalancedNode(node.right) ||
+      !this.#isBalancedNode(node.left) ||
+      Math.abs(this.#nodeHeight(node.left) - this.#nodeHeight(node.right)) > 1
     ) {
       return false;
     } else {
@@ -200,31 +210,13 @@ export function Tree(array = []) {
     }
   }
 
-  function isBalanced() {
-    return isBalancedNode(root);
+  isBalanced() {
+    return this.#isBalancedNode(this.#root);
   }
 
-  function rebalance() {
+  rebalance() {
     const newArray = [];
-    inOrderForEach((val) => newArray.push(val));
-    root = buildTree(newArray);
+    this.inOrderForEach((val) => newArray.push(val));
+    this.#root = this.#buildTree(newArray);
   }
-
-  return {
-    get root() {
-      return root;
-    },
-    includes,
-    insert,
-    deleteItem,
-    levelOrderForEachRec,
-    levelOrderForEach,
-    preOrderForEach,
-    inOrderForEach,
-    postOrderForEach,
-    depth,
-    height,
-    isBalanced,
-    rebalance,
-  };
 }

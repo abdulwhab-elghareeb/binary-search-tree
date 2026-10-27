@@ -19,17 +19,37 @@ const generateRandomArray = (min = 0, max = 100, size = 16) => {
   return resultArr;
 };
 
-const tree = Tree(generateRandomArray());
+const tree = new Tree(generateRandomArray());
+prettyPrint(tree.root);
+console.log(tree.isBalanced());
+
+console.group("LEVEL------------------------------------------");
+tree.levelOrderForEach(console.log);
+console.groupEnd();
+
+console.group("PRE--------------------------------------------");
+tree.preOrderForEach(console.log);
+console.groupEnd();
+
+console.group("POST-------------------------------------------");
+tree.postOrderForEach(console.log);
+console.groupEnd();
+
+console.group("IN ORDER---------------------------------------");
+tree.inOrderForEach(console.log);
+console.groupEnd();
+
 tree.insert(101);
 tree.insert(202);
 tree.insert(303);
 tree.insert(404);
 
-console.log(tree.isBalanced());
-tree.rebalance();
+prettyPrint(tree.root);
 console.log(tree.isBalanced());
 
+tree.rebalance();
 prettyPrint(tree.root);
+console.log(tree.isBalanced());
 
 console.group("LEVEL------------------------------------------");
 tree.levelOrderForEach(console.log);
