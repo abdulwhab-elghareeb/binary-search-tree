@@ -1,7 +1,7 @@
 import { Node } from "./Node.js";
 import { mergeSort, unique } from "./helpers.js";
 
-export function Tree(array) {
+export function Tree(array = []) {
   const cleanedArr = mergeSort(unique(array));
 
   function buildTree(array) {
@@ -84,19 +84,19 @@ export function Tree(array) {
   }
 
   function deleteItem(value) {
-    return deleteNode(root, value);
+    deleteNode(root, value);
   }
 
-  function levelOrderRec(callback, arr = [root]) {
-    if (arr.length === 0) return;
+  function levelOrderRec(callback, queue = [root]) {
+    if (queue.length === 0) return;
 
-    const currentNode = arr.shift();
+    const currentNode = queue.shift();
     callback(currentNode.data);
 
-    if (currentNode.left) arr.push(currentNode.left);
-    if (currentNode.right) arr.push(currentNode.right);
+    if (currentNode.left) queue.push(currentNode.left);
+    if (currentNode.right) queue.push(currentNode.right);
 
-    levelOrderRec(arr);
+    levelOrderRec(queue);
   }
 
   function levelOrderForEachRec(callback) {
@@ -106,14 +106,14 @@ export function Tree(array) {
 
   function levelOrderForEach(callback) {
     if (!callback) throw new Error("A callback is required");
-    const arr = [root];
+    const queue = [root];
 
-    while (arr.length > 0) {
-      const currentNode = arr.shift();
+    while (queue.length) {
+      const currentNode = queue.shift();
       callback(currentNode.data);
 
-      if (currentNode.left) arr.push(currentNode.left);
-      if (currentNode.right) arr.push(currentNode.right);
+      if (currentNode.left) queue.push(currentNode.left);
+      if (currentNode.right) queue.push(currentNode.right);
     }
   }
 
@@ -155,11 +155,7 @@ export function Tree(array) {
 
   function nodeHeight(node) {
     if (!node) return -1;
-
-    const leftSubtree = nodeHeight(node.left);
-    const rightSubtree = nodeHeight(node.right);
-
-    return Math.max(leftSubtree, rightSubtree) + 1;
+    return Math.max(nodeHeight(node.left), nodeHeight(node.right)) + 1;
   }
 
   function nodeDepth(root, value) {
@@ -182,8 +178,8 @@ export function Tree(array) {
       }
     }
 
-    const height = nodeHeight(tempRoot);
-    return height >= 0 ? height : undefined;
+    if (!tempRoot) return;
+    return nodeHeight(tempRoot);
   }
 
   function depth(value) {
@@ -193,15 +189,19 @@ export function Tree(array) {
   function isBalancedNode(node) {
     if (!node) return true;
 
-    if (Math.abs(nodeHeight(node.left) - nodeHeight(node.right)) > 1) {
+    if (
+      !isBalancedNode(node.right) ||
+      !isBalancedNode(node.left) ||
+      Math.abs(nodeHeight(node.left) - nodeHeight(node.right)) > 1
+    ) {
       return false;
     } else {
-      return isBalancedNode(node.left) && isBalancedNode(node.right);
+      return true;
     }
   }
 
   function isBalanced() {
-    return isBalancedNode(root) > 0;
+    return isBalancedNode(root);
   }
 
   function rebalance() {
